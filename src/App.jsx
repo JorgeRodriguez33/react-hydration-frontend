@@ -1,35 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from 'react';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState('');
+
+  // Obtener las tareas desde el backend
+  useEffect(() => {
+    fetch('http://localhost:3000/api/tasks')
+      .then((response) => response.json())
+      .then((data) => setTasks(data));
+  }, []);
+
+  // Agregar una nueva tarea al backend
+  const addTask = () => {
+    fetch('http://localhost:3000/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newTask }),
+    })
+      .then((response) => response.json())
+      .then((task) => setTasks((prev) => [...prev, task]));
+    setNewTask('');
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div>
+      <h1>To-Do List</h1>
+      <ul>
+        {tasks.map((task) => (
+          <li key={task.id}>{task.name}</li>
+        ))}
+      </ul>
+      <input
+        type="text"
+        value={newTask}
+        onChange={(e) => setNewTask(e.target.value)}
+        placeholder="Nueva tarea"
+      />
+      <button onClick={addTask}>Agregar</button>
+    </div>
+  );
+};
 
-export default App
+export default App;
