@@ -1,10 +1,17 @@
 .login-container{
-    margin-top: 5%;
+    display: flex; /* Usamos flexbox */
+    justify-content: center; /* Centrar horizontalmente */
+    align-items: center; /* Centrar verticalmente */
+    height: 100vh; /* Asegurar que tome toda la altura de la ventana */
+    margin: 0; /* Elimina márgenes adicionales */
+    max-width: 100%;
+
 }
 .login-form-1{
     border-radius: 5px;
     box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.2), 0 9px 26px 0 rgba(0, 0, 0, 0.19);
     padding: 5%;
+    width: 100%;
 }
 .login-form-1 h3{
     text-align: center;

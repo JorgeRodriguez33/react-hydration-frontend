@@ -17,14 +17,12 @@ function Login() {
 
 
   const loginSubmit = (event) => {
+    event.preventDefault(); // Previene que el formulario haga un GET
+    console.log("process.env.PORT : ",process.env.PORT );
+    console.log("Formulario enviado, username:", username, "password:", password);
 
-    event.preventDefault(); 
-
-    console.log("username: ",password);
-    startLogin({ username: username, password: password }); // Llama a la función de inicio de sesión
-
-  };
-
+    startLogin({ username: username, password: password });
+};
   useEffect(() => {
     if (errorMessage !== undefined) {
         Swal.fire('Error en la autenticación', errorMessage, 'error'); 

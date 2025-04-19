@@ -11,9 +11,9 @@ export const useAuthStore = () => {
      //   dispatch( onChecking() );
         try {
             console.log("data: ");
-            const data = await login(username, password);
+            const data = await login({ username, password });
             console.log("data: ",data);
-            dispatch( onLogin({ name: data.name, uid: data.uid }) );
+            dispatch( onLogin({ name: username }) );
             
         } catch (error) {
             dispatch( onLogout('Credenciales incorrectas') );

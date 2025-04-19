@@ -7,15 +7,15 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 export const AppRouters = () => {
 
     const { status } = useAuthStore();
-    console.log("status: ",status)
+
     return (
         <Routes>
             {
                 (status === 'not-authenticated')  
                     ? (
                         <>
-                            <Route path="/*" element={ <Login /> } /> 
-                            <Route path="/*" element={ <Navigate to="/login" /> } /> 
+                            <Route path="/" element={ <Login /> } /> 
+                            <Route path="/*" element={ <Navigate to="/" /> } /> 
                         </>
                     )
                     : (
