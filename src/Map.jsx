@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "leaflet-rotatedmarker"; // Necesario para habilitar la rotación de marcadores
@@ -50,6 +50,7 @@ function Map() {
   // Estado para guardar los marcadores de cada vehículo
   const [marcadoresVehiculos, setMarcadoresVehiculos] = useState({});
 
+  const intervalRef = useRef(null); 
   /*
   ** 1️⃣ PRIMER USEEFFECT: Inicializa el mapa cuando el componente se monta **
   ** - Se ejecuta SOLO UNA VEZ al inicio cuando "map" es null **
@@ -126,38 +127,38 @@ function Map() {
   }, [map, vehiculos]); // Se ejecuta cuando el mapa y los vehículos cambian
   
   // 🔹 Nuevo `useEffect` separado para mover los vehículos después de que los marcadores estén listos
-  useEffect(() => {
-    if (!map || Object.keys(marcadoresVehiculos).length === 0) return;
-  
-    const nuevosVehiculos = vehiculos.map((vehiculo) => {
-      if (!vehiculo.activo) return vehiculo;
-      console.log("vehiculo.inicio: ",vehiculo.inicio)
-      let index = vehiculo.inicio;
-      const interval = setInterval(() => {
-        index += vehiculo.direccion;
-  
+
+useEffect(() => {
+  if (!map || Object.keys(marcadoresVehiculos).length === 0) return;
+
+  // Limpia el intervalo anterior antes de crear uno nuevo
+  if (intervalRef.current) clearInterval(intervalRef.current);
+
+  intervalRef.current = setInterval(() => {
+    setVehiculos((prevVehiculos) =>
+      prevVehiculos.map((vehiculo) => {
+        if (!vehiculo.activo) return vehiculo;
+
+        let index = vehiculo.inicio + vehiculo.direccion;
+
         if (index < 0 || index >= recorridoDetallado.length) {
-          console.log("clearInterval: ",clearInterval)
-          clearInterval(interval);
-          return;
+          return { ...vehiculo/*, activo: false */}; // Detener el vehículo si sale de los límites
         }
-  
+
         const nuevoPunto = recorridoDetallado[index];
-  
-        if (marcadoresVehiculos[vehiculo.id]) {
-          marcadoresVehiculos[vehiculo.id].setLatLng([nuevoPunto.lat, nuevoPunto.lng]);
-          marcadoresVehiculos[vehiculo.id].setIcon(carIcon(nuevoPunto.direccion));
-          marcadoresVehiculos[vehiculo.id].setRotationAngle(nuevoPunto.direccion);
-        }
-      }, 101 - speedCar);
-      console.log("index: ",index)
-      return { ...vehiculo, inicio: index, interval };
-    });
-  
-    setVehiculos(nuevosVehiculos);
-  
-    return () => nuevosVehiculos.forEach((vehiculo) => clearInterval(vehiculo.interval));
-  }, [map, speedCar, marcadoresVehiculos]); // Se ejecuta cuando los marcadores están listos
+        marcadoresVehiculos[vehiculo.id].setLatLng([nuevoPunto.lat, nuevoPunto.lng]);
+        marcadoresVehiculos[vehiculo.id].setIcon(carIcon(nuevoPunto.direccion));
+        marcadoresVehiculos[vehiculo.id].setRotationAngle(nuevoPunto.direccion);
+
+        return { ...vehiculo, inicio: index }; // No reinicia el viaje, solo actualiza el punto actual
+      })
+    );
+
+  }, 101 - speedCar); // ✅ La velocidad cambia sin resetear el recorrido
+
+  return () => clearInterval(intervalRef.current); // Limpia el intervalo al desmontar
+}, [map, marcadoresVehiculos,speedCar]); // ✅ La velocidad cambia sin provocar re-render
+
   
 
   // Renderiza la barra de navegación y el contenedor del mapa
